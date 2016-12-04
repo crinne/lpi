@@ -20,11 +20,36 @@ int main(int argc, char *argv[])
         }
     }
     
-    int outputFd;
-    char buf[BUF_SIZE + 1];
-    ssize_t numRead;
+    int openFlags;
+    int filePerms;
+    /* rw-rw-rw */
+    filePerms = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH; 
+    if (flags) {
+        openFlags = O_CREAT | O_WRONLY | O_APPEND;
+    } else {
+        openFlags = O_CREAT | O_WRONLY;
+    }
 
-    // open file
+    int list_of_files[1000];
     
+    // Opening files
+    for (int i = optind; i < argc; i++) {
+        list_of_files[i] = open(argv[i], openFlags, filePerms);
+        if (list_of_files[i] == -1) {
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    char buffer[BUF_SIZE] = "hello Multifile\n";
+    ssize_t numRead, numWritten;
+
+    for (int i = optind; i < argc; i++) {
+        numWritten = write(list_of_files[i], buffer, BUF_SIZE);
+        if (numWritten == -1 ) {
+            exit(EXIT_FAILURE);
+        }
+            
+            
+    }
     exit(EXIT_SUCCESS);
- }
+}

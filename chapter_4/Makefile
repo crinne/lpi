@@ -10,6 +10,6 @@ main.o : main.c headers.h
 	$(CC) $(CFLAGS) -c main.c
 
 
-.PHONY: clean
-clean:
+.PHONY : clean
+clean :
 	rm mytee $(OBJECTS)
