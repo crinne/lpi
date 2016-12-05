@@ -1,5 +1,5 @@
 #include "headers.h"
-#include <sys/stat.h>  // some statistic
+#include <sys/stat.h>
 #include <fcntl.h> // open
 
 #define BUF_SIZE 1024
@@ -40,16 +40,19 @@ int main(int argc, char *argv[])
         }
     }
 
-    char buffer[BUF_SIZE] = "hello Multifile\n";
-    ssize_t numRead, numWritten;
+    char buffer[BUF_SIZE+1];
+    ssize_t numRead;
 
-    for (int i = optind; i < argc; i++) {
-        numWritten = write(list_of_files[i], buffer, BUF_SIZE);
-        if (numWritten == -1 ) {
-            exit(EXIT_FAILURE);
+    while ((numRead = read(STDIN_FILENO, buffer, BUF_SIZE)) > 0) {
+        buffer[numRead] = '\0';
+
+        printf("%s", buffer);
+        for (int i = optind; i < argc; i++) {
+            if (write(list_of_files[i], buffer, numRead) != numRead) {
+                exit(EXIT_FAILURE);
+            }
         }
-            
-            
     }
+    
     exit(EXIT_SUCCESS);
 }
