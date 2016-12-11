@@ -1,0 +1,5 @@
+Hello, this is my testfile.
+
+One empty line...
+
+and story continues!
