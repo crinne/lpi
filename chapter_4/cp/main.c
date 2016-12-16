@@ -1,60 +1,48 @@
 #include "headers.h"
-#include <sys/stat.h>
-#include <fcntl.h> // open
-#include <unistd.h>
-#include <string.h>
 
 #define BUF_SIZE 1024
 
 int main(int argc, char *argv[])
 {
 
-    if (argc < 2) {
+    if (argc != 3 || strcmp(argv[1], "-help") == 0) {
+        fprintf(stderr, "Usage: %s old-file new-file\n", argv[0]);
         exit(EXIT_SUCCESS);
     }
 
-    // open file
     int inputFd;
     if ((inputFd = open(argv[1],O_RDWR)) == -1) {
+        fprintf(stderr, "Error: opening file %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
 
-    /* creating test file
-    char buffer[] = "This is my test file \n and second rot\n";
-    int outputFd;
-    if ((outputFd = open("test2.txt", O_RDWR)) != -1) {
-        if (lseek(outputFd, 100, SEEK_SET) == -1) {
-            exit(EXIT_FAILURE);
-        }
-
-        if (write(outputFd, buffer, strlen(buffer)) == -1) {
-            printf("Err\n");
-        }
-    }
-*/
-    //lseek(inputFd, 10, SEEK_SET);
-    
+    int openFlags = O_CREAT | O_WRONLY | O_TRUNC;
+    mode_t filePerms = S_IRUSR | S_IWUSR| S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
     ssize_t numRead;
-    char buf[BUF_SIZE + 1];
+    char buf[BUF_SIZE];
+
+    int outputFd;
+    outputFd = open(argv[2], openFlags, filePerms);
+    if (outputFd == -1) {
+        fprintf(stderr, "Error opening file %s\n", argv[2]);
+    }
     
+
     while ((numRead = read(inputFd, buf, BUF_SIZE)) > 0) {
-        //buf[numRead] = '\0';
         
-        for (int i = 0; i < numRead; i++) {    
-            if (buf[i] == '\0') {
-                printf("Hole\n");
-            } 
-            else {
-                printf("%c\n", buf[i]);
-            }
-            //if (write(STDOUT_FILENO, buf, numRead) != numRead) {
-            //    exit(EXIT_FAILURE);
-           // }
+        if ((write(outputFd, buf, numRead)) == -1) {
+            fprintf(stderr, "Error: writing file\n");
+            exit(EXIT_FAILURE);
         }
     }
 
     if (close(inputFd) == -1) {
+        fprintf(stderr, "Error closing input\n");
         exit(EXIT_FAILURE); 
+    }
+    if (close(outputFd) == -1) {
+        fprintf(stderr, "Error: closing output\n");
+        exit(EXIT_FAILURE);
     }
     
     exit(EXIT_SUCCESS);
