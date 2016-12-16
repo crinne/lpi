@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
     int openFlags = O_CREAT | O_WRONLY | O_TRUNC;
     mode_t filePerms = S_IRUSR | S_IWUSR| S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    ssize_t numRead;
+    ssize_t numRead, numWritten;
     char buf[BUF_SIZE];
 
     int outputFd;
@@ -27,12 +27,28 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error opening file %s\n", argv[2]);
     }
     
-
+    unsigned long holeSize = 0;
     while ((numRead = read(inputFd, buf, BUF_SIZE)) > 0) {
-        
-        if ((write(outputFd, buf, numRead)) == -1) {
-            fprintf(stderr, "Error: writing file\n");
-            exit(EXIT_FAILURE);
+        for (int i = 0; i < numRead; i++) {
+            
+            if (buf[i] == '\0') {
+                holeSize++;
+            }
+            else if (holeSize > 0) {
+                if (lseek(outputFd, holeSize, SEEK_CUR) == -1) {
+                    fprintf(stderr, "Error: lseek\n");
+                    exit(EXIT_FAILURE);
+                }
+                numWritten = write(outputFd, &buf[i], 1);
+                holeSize = 0;
+            }
+            else {
+                numWritten = write(outputFd, &buf[i], 1);
+            }
+            if (numWritten == -1) {
+                fprintf(stderr, "Error: write\n");
+                exit(EXIT_FAILURE);
+            }
         }
     }
 
