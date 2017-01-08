@@ -12,14 +12,14 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-        
+
     int inputFd = open(argv[1], O_RDWR);
 
     if(inputFd == -1) {
         fprintf(stderr, "Error opening the file\n");
         exit(EXIT_FAILURE);
     }
-    printf("File descriptor is: %d\n", inputFd); 
+    printf("File descriptor is: %d\n", inputFd);
 
     int newFd = dup(inputFd);
     if (newFd == -1) {
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
 
     printf("Testing hme made dup2_test fn\n");
-    
+
     int newFd2 = dup2_test(inputFd, newFd1);
     if (newFd2 == -1) {
         fprintf(stderr, "failed to dub FD\n");
@@ -52,6 +52,16 @@ int main(int argc, char *argv[]) {
 
 
 int dup2_test(int oldFd,int newFd) {
+    // Check if oldFd is valid descriptor
+    if (fcntl(oldFd, F_GETFL) == -1) {
+        fprintf(stderr, "Old file descriptior is not valid\n");
+        return -1;
+    }
+
+    if (oldFd == newFd) {
+        return newFd;
+    }
+
     if (close(newFd) ==-1) {
         fprintf(stderr, "Err closing file\n");
         exit(EXIT_FAILURE);
@@ -63,4 +73,3 @@ int dup_test(int oldFd) {
     /*Lowest numbered available descriptor greater than or equal to arg "10" */
     return fcntl(oldFd, F_DUPFD, 10);
 }
-
