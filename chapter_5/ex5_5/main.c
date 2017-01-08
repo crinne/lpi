@@ -19,23 +19,41 @@ int main(int argc, char *argv[]) {
     dupInputFd = dup(inputFd);
     char buffer[1024];
     ssize_t numRead;
-    int true = 1;
+    int istrue = 1;
     int c;
-    while(true) {
+    while(istrue) {
         print_activity();
         c = getchar();
 
         switch(c) {
             case '1':
                 offset = lseek(inputFd, 0, SEEK_CUR);
-                printf("current file offset : %lld \n", offset);
+                if (offset == -1) {
+                    fprintf(stderr, "Error: lseek fd\n");
+                    exit(EXIT_FAILURE);
+                }
+
                 dupOffset = lseek(dupInputFd, 0, SEEK_CUR);
+                if (dupOffset == -1) {
+                    fprintf(stderr, "Error: lseek dup fd\n");
+                    exit(EXIT_FAILURE);
+                }
+                printf("current file offset : %lld \n", offset);
                 printf("dublicated file offset : %lld \n", dupOffset);
 
                 break;
             case '2':
+                numRead = read(inputFd, buffer, 5);
 
-                if ((numRead = read(inputFd, buffer, 5)) != -1) {
+                if ( numRead == -1 ) {
+                    fprintf(stderr, "Err: read\n");
+                    exit(EXIT_FAILURE);
+                }
+
+                else if ( numRead == 0 ) {
+                    printf("EOF\n");
+                }
+                else if ( numRead > 0 ) {
                     buffer[5] = '\n';
                     if (write(STDOUT_FILENO, buffer, numRead+1) == -1) {
                         fprintf(stderr, "Err: write\n");
@@ -47,7 +65,7 @@ int main(int argc, char *argv[]) {
                 openFlagTest(inputFd, dupInputFd);
                 break;
             case '9':
-                true = 0;
+                istrue = 0;
                 break;
             default:
                 printf("wrong input: %c\n", c);
@@ -61,8 +79,8 @@ int main(int argc, char *argv[]) {
 void print_activity() {
     printf("Activities:\n"
                     "1. Print file offset\n"
-                    "2. Read char's\n"
-                    "5. Test Open flags\n"
+                    "2. Read 5 char's from input file\n"
+                    "5. Print open flags\n"
                     "9. Exit\n");
 }
 
@@ -84,7 +102,7 @@ void openFlagTest(int fd, int dupFd) {
     dupAccessMode = dupFlags & O_ACCMODE;
 
     if (flags & O_SYNC && dupFlags & O_SYNC) {
-        printf("Witesare synchronized\n");
+        printf("File and dublicated file write is synchronized\n");
     }
 
     if (accessMode == O_WRONLY || accessMode == O_RDWR) {
