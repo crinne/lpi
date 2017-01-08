@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s filename\n", argv[0]);
         exit(EXIT_FAILURE);
     }
-    off_t offset, dupOffset; 
+    off_t offset, dupOffset;
     int inputFd, dupInputFd;
     inputFd = open(argv[1], O_RDWR | O_SYNC);
     if (inputFd == -1) { fprintf(stderr, "Err: open\n"); exit(EXIT_FAILURE);}
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 
     dupInputFd = dup(inputFd);
     char buffer[1024];
-    ssize_t numWritten, numRead;
+    ssize_t numRead;
     int true = 1;
     int c;
     while(true) {
@@ -28,9 +28,9 @@ int main(int argc, char *argv[]) {
         switch(c) {
             case '1':
                 offset = lseek(inputFd, 0, SEEK_CUR);
-                printf("current file offset : %ld \n", offset);
+                printf("current file offset : %lld \n", offset);
                 dupOffset = lseek(dupInputFd, 0, SEEK_CUR);
-                printf("dublicated file offset : %ld \n", dupOffset);
+                printf("dublicated file offset : %lld \n", dupOffset);
 
                 break;
             case '2':
@@ -101,4 +101,3 @@ void flush_input() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
-
