@@ -6,7 +6,7 @@
     needed to restore a calling environment */
 static jmp_buf env;
 
-static void
+void
 foo(int argc)
 {
     if (argc) {
@@ -21,15 +21,15 @@ foo(int argc)
             case 2:
                 printf("Case 2\n");
                 break;
-            }
+        }
     }
 }
 
 int
 main(int argc, char *argv[])
 {
+    foo(1);
     foo(0);
-    //foo(1);
     longjmp(env, 0);
     exit(EXIT_SUCCESS);
 }
