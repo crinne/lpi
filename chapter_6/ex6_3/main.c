@@ -78,7 +78,7 @@ unsetenv_1(const char *name)
         return 0;
     }
 
-    /* build buffer in a form of name=value */
+    /* build a buffer in a form of name=value */
     unsigned long num = strlen(name) + strlen(value);
 
     char *buffer = malloc(num+1);
@@ -87,7 +87,7 @@ unsetenv_1(const char *name)
     strcat(buffer, "=");
     strcat(buffer, value);
 
-    /*  Go thorugh environ list and if you find environment variable
+    /*  Go through environ list and if find environment variable
     then make it equal to NULL*/
     char **ep;
 
